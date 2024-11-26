@@ -21,18 +21,19 @@ func main() {
 	}
 	defer conn.Close(appCtx)
 
-	pref := tele.Settings{
+	botSettings := tele.Settings{
 		Token:  os.Getenv("TELEGRAM_BOT_TOKEN"),
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	}
 
-	b, err := tele.NewBot(pref)
+	b, err := tele.NewBot(botSettings)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	err = handlers.RegisterHandlers(b)
+	handlerController := handlers.NewHandlerController(b, conn)
+	err = handlerController.RegisterHandlers(appCtx)
 	if err != nil {
 		log.Fatal(err)
 		return

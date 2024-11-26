@@ -7,8 +7,9 @@
 
 package model
 
-type Rooms struct {
-	ID    int32 `sql:"primary_key"`
-	InUse bool
-	Type  int32
+type Employees struct {
+	ID       int32 `sql:"primary_key"`
+	Username string
+	Name     *string
+	Position int32
 }

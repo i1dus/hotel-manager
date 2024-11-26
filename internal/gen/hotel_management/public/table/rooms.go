@@ -19,6 +19,7 @@ type roomsTable struct {
 	// Columns
 	ID    postgres.ColumnInteger
 	InUse postgres.ColumnBool
+	Type  postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -61,8 +62,9 @@ func newRoomsTableImpl(schemaName, tableName, alias string) roomsTable {
 	var (
 		IDColumn       = postgres.IntegerColumn("id")
 		InUseColumn    = postgres.BoolColumn("in_use")
-		allColumns     = postgres.ColumnList{IDColumn, InUseColumn}
-		mutableColumns = postgres.ColumnList{InUseColumn}
+		TypeColumn     = postgres.IntegerColumn("type")
+		allColumns     = postgres.ColumnList{IDColumn, InUseColumn, TypeColumn}
+		mutableColumns = postgres.ColumnList{InUseColumn, TypeColumn}
 	)
 
 	return roomsTable{
@@ -71,6 +73,7 @@ func newRoomsTableImpl(schemaName, tableName, alias string) roomsTable {
 		//Columns
 		ID:    IDColumn,
 		InUse: InUseColumn,
+		Type:  TypeColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

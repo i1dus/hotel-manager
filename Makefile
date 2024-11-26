@@ -10,11 +10,15 @@ MIGRATION_FOLDER=$(CURDIR)/migrations
 migration-create:
 	goose -dir "$(MIGRATION_FOLDER)" create "$(name)" sql
 
-migration-up:
+.migration-up:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP)" up
 
-migration-down:
+.migration-down:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP)" down
+
+migration-up: .migration-up
+migration-down: .migration-down
+db-reset: .migration-down .migration-up
 
 jet:
 	jet -dsn=$(DATABASE_URL) \
