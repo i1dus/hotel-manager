@@ -8,13 +8,13 @@ DATABASE_URL=postgresql://postgres:vdJ%23cZ8s@localhost:5432/hotel_management?ss
 MIGRATION_FOLDER=$(CURDIR)/migrations
 
 migration-create:
-	goose -dir "$(MIGRATION_FOLDER)" create "$(name)" sql
+	goose -dir "$(MIGRATION_FOLDER)" create rename_me sql
 
 .migration-up:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP)" up
 
 .migration-down:
-	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP)" down
+	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP)" down-to 0
 
 migration-up: .migration-up
 migration-down: .migration-down

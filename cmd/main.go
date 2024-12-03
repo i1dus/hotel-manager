@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/jackc/pgx/v5"
-	"hotel-management/internal/handlers"
+	"hotel-management/internal/handler"
 	"log"
 	"os"
 	"time"
@@ -32,8 +32,8 @@ func main() {
 		return
 	}
 
-	handlerController := handlers.NewHandlerController(b, conn)
-	err = handlerController.RegisterHandlers(appCtx)
+	handlerController := handler.NewHandlerController(b, conn)
+	handlerController.RegisterHandlers(appCtx)
 	if err != nil {
 		log.Fatal(err)
 		return

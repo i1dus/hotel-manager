@@ -11,8 +11,10 @@ import (
 	"hotel-management/internal/gen/hotel_management/public/table"
 )
 
-var EmployeeNotFound = errors.New("сотрудник не найден")
-var EmployeesNotFound = errors.New("сотрудники не найдены")
+var (
+	ErrEmployeeNotFound  = errors.New("сотрудник не найден")
+	ErrEmployeesNotFound = errors.New("сотрудники не найдены")
+)
 
 type EmployeeRepository struct {
 	conn *pgx.Conn
@@ -42,11 +44,14 @@ func (r *EmployeeRepository) RemoveEmployee(ctx context.Context, username string
 		DELETE().
 		WHERE(table.Employees.Username.EQ(postgres.String(username))).Sql()
 
-	exec, err := r.conn.Exec(ctx, stmt, args...)
-	if exec.RowsAffected() == 0 {
-		return EmployeeNotFound
+	res, err := r.conn.Exec(ctx, stmt, args...)
+	if err != nil {
+		return err
 	}
-	return err
+	if res.RowsAffected() == 0 {
+		return ErrEmployeeNotFound
+	}
+	return nil
 }
 
 func (r *EmployeeRepository) ListEmployees(ctx context.Context) ([]domain.Employee, error) {
@@ -59,7 +64,7 @@ func (r *EmployeeRepository) ListEmployees(ctx context.Context) ([]domain.Employ
 	rows, err := r.conn.Query(ctx, stmt, args...)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, EmployeesNotFound
+			return nil, ErrEmployeesNotFound
 		}
 		return nil, err
 	}

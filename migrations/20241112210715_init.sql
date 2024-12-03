@@ -3,8 +3,9 @@
 CREATE TABLE rooms
 (
     id     SERIAL PRIMARY KEY,
-    in_use BOOLEAN NOT NULL DEFAULT false,
-    type   INTEGER NOT NULL
+    number TEXT    NOT NULL UNIQUE,
+    type   INTEGER NOT NULL,
+    price  INTEGER NOT NULL
 );
 
 CREATE TABLE employees
@@ -15,11 +16,33 @@ CREATE TABLE employees
     position INTEGER NOT NULL
 );
 
-ALTER TABLE employees ADD CONSTRAINT unique_user_position UNIQUE (username, position);
+CREATE TABLE clients
+(
+    id       SERIAL PRIMARY KEY,
+    name     TEXT NOT NULL,
+    surname  TEXT NOT NULL,
+    passport TEXT NOT NULL UNIQUE
+);
+
+ALTER TABLE employees
+    ADD CONSTRAINT unique_user_position UNIQUE (username, position);
+
+CREATE TABLE room_occupancies
+(
+    id          SERIAL PRIMARY KEY,
+    room_number TEXT        NOT NULL,
+    client_id   INTEGER     NOT NULL,
+    start_at    timestamptz NOT NULL,
+    end_at      timestamptz,
+    description TEXT
+);
+
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 DROP TABLE rooms;
 DROP TABLE employees;
+DROP TABLE clients;
+DROP TABLE room_occupancies;
 -- +goose StatementEnd
