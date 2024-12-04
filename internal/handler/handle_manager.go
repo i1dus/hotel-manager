@@ -6,6 +6,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 	"hotel-management/internal/usecase/add_client_usecase"
 	"hotel-management/internal/usecase/add_employee_usecase"
+	"hotel-management/internal/usecase/add_room_occupancy_usecase"
 	"hotel-management/internal/usecase/add_room_usecase"
 	"hotel-management/internal/usecase/change_room_price_usecase"
 	list_employee_usecase "hotel-management/internal/usecase/list_employees_usecase"
@@ -41,15 +42,20 @@ type ChangeRoomPriceUseCase interface {
 	ChangeRoomPrice(c tele.Context) error
 }
 
+type AddRoomOccupancyUseCase interface {
+	AddRoomOccupancy(c tele.Context) error
+}
+
 type HandlerController struct {
-	bot                    *tele.Bot
-	addEmployeeUseCase     AddEmployeeUseCase
-	removeEmployeeUseCase  RemoveEmployeeUseCase
-	listEmployeesUseCase   ListEmployeesUseCase
-	addClientUseCase       AddClientUseCase
-	addRoomUseCase         AddRoomUseCase
-	listRoomsUseCase       ListRoomsUseCase
-	changeRoomPriceUseCase ChangeRoomPriceUseCase
+	bot                     *tele.Bot
+	addEmployeeUseCase      AddEmployeeUseCase
+	removeEmployeeUseCase   RemoveEmployeeUseCase
+	listEmployeesUseCase    ListEmployeesUseCase
+	addClientUseCase        AddClientUseCase
+	addRoomUseCase          AddRoomUseCase
+	listRoomsUseCase        ListRoomsUseCase
+	changeRoomPriceUseCase  ChangeRoomPriceUseCase
+	addRoomOccupancyUseCase AddRoomOccupancyUseCase
 }
 
 func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
@@ -60,15 +66,17 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 	addRoomUseCase := add_room_usecase.NewAddRoomUseCase(conn)
 	listRoomsUseCase := list_rooms_usecase.NewListRoomsUseCase(conn)
 	changeRoomPriceUseCase := change_room_price_usecase.NewChangeRoomPriceUseCase(conn)
+	addRoomOccupancyUseCase := add_room_occupancy_usecase.NewAddRoomOccupancyUseCase(conn)
 	return &HandlerController{
-		bot:                    bot,
-		addEmployeeUseCase:     addEmployeeUseCase,
-		removeEmployeeUseCase:  removeEmployeeUseCase,
-		listEmployeesUseCase:   listEmployeesUseCase,
-		addClientUseCase:       addClientUseCase,
-		addRoomUseCase:         addRoomUseCase,
-		listRoomsUseCase:       listRoomsUseCase,
-		changeRoomPriceUseCase: changeRoomPriceUseCase,
+		bot:                     bot,
+		addEmployeeUseCase:      addEmployeeUseCase,
+		removeEmployeeUseCase:   removeEmployeeUseCase,
+		listEmployeesUseCase:    listEmployeesUseCase,
+		addClientUseCase:        addClientUseCase,
+		addRoomUseCase:          addRoomUseCase,
+		listRoomsUseCase:        listRoomsUseCase,
+		changeRoomPriceUseCase:  changeRoomPriceUseCase,
+		addRoomOccupancyUseCase: addRoomOccupancyUseCase,
 	}
 }
 
@@ -85,8 +93,12 @@ func (ctrl *HandlerController) RegisterHandlers(ctx context.Context) {
 	// clients managing commands
 	ctrl.bot.Handle("/add_client", ctrl.addClientUseCase.AddClient)
 
-	// rooms managing commads
+	// rooms managing commands
 	ctrl.bot.Handle("/add_room", ctrl.addRoomUseCase.AddRoom)
 	ctrl.bot.Handle("/list_rooms", ctrl.listRoomsUseCase.ListRooms)
 	ctrl.bot.Handle("/change_room_price", ctrl.changeRoomPriceUseCase.ChangeRoomPrice)
+
+	// room occupancy managing commands
+	ctrl.bot.Handle("/add_occupancy", ctrl.addRoomOccupancyUseCase.AddRoomOccupancy)
+
 }

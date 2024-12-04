@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/go-jet/jet/v2/postgres"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 	"hotel-management/internal/domain"
@@ -35,4 +36,21 @@ func (r *ClientRepository) AddClient(ctx context.Context, client domain.Client) 
 
 	_, err := r.conn.Exec(ctx, stmt, args...)
 	return err
+}
+
+func (r *ClientRepository) IsClientExist(ctx context.Context, clientID int64) (bool, error) {
+	stmt, args := postgres.
+		SELECT(postgres.COUNT(postgres.STAR)).
+		FROM(table.Clients).
+		WHERE(table.Clients.ID.EQ(postgres.Int(clientID))).Sql()
+
+	var count int64
+	err := r.conn.QueryRow(ctx, stmt, args...).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	if count < 1 {
+		return false, nil
+	}
+	return true, nil
 }

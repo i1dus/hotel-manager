@@ -89,3 +89,20 @@ func (r *RoomRepository) ChangeRoomPrice(ctx context.Context, number string, pri
 	}
 	return nil
 }
+
+func (r *RoomRepository) IsRoomExist(ctx context.Context, number string) (bool, error) {
+	stmt, args := postgres.
+		SELECT(postgres.COUNT(postgres.STAR)).
+		FROM(table.Rooms).
+		WHERE(table.Rooms.Number.EQ(postgres.String(number))).Sql()
+
+	var count int64
+	err := r.conn.QueryRow(ctx, stmt, args...).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	if count < 1 {
+		return false, nil
+	}
+	return true, nil
+}
