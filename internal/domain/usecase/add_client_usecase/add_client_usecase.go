@@ -2,11 +2,9 @@ package add_client_usecase
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
 	"hotel-management/internal/domain"
-	"hotel-management/internal/repository"
-	"hotel-management/internal/usecase"
+	"hotel-management/internal/domain/usecase"
 )
 
 type ClientRepository interface {
@@ -17,8 +15,7 @@ type AddClientUseCase struct {
 	clientRepo ClientRepository
 }
 
-func NewAddClientUseCase(conn *pgx.Conn) *AddClientUseCase {
-	clientRepo := repository.NewClientRepository(conn)
+func NewAddClientUseCase(clientRepo ClientRepository) *AddClientUseCase {
 	return &AddClientUseCase{clientRepo: clientRepo}
 }
 
@@ -48,5 +45,5 @@ func (uc *AddClientUseCase) AddClient(c tele.Context) error {
 	if err != nil {
 		return c.Send(usecase.ErrorMessage(err))
 	}
-	return c.Send("Клиент успешно добавлен!")
+	return c.Send(domain.PrefixSuccess + "Клиент успешно добавлен!")
 }

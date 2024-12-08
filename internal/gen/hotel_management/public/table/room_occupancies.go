@@ -19,7 +19,7 @@ type roomOccupanciesTable struct {
 	// Columns
 	ID          postgres.ColumnInteger
 	RoomNumber  postgres.ColumnString
-	ClientID    postgres.ColumnInteger
+	Passport    postgres.ColumnString
 	StartAt     postgres.ColumnTimestampz
 	EndAt       postgres.ColumnTimestampz
 	Description postgres.ColumnString
@@ -65,12 +65,12 @@ func newRoomOccupanciesTableImpl(schemaName, tableName, alias string) roomOccupa
 	var (
 		IDColumn          = postgres.IntegerColumn("id")
 		RoomNumberColumn  = postgres.StringColumn("room_number")
-		ClientIDColumn    = postgres.IntegerColumn("client_id")
+		PassportColumn    = postgres.StringColumn("passport")
 		StartAtColumn     = postgres.TimestampzColumn("start_at")
 		EndAtColumn       = postgres.TimestampzColumn("end_at")
 		DescriptionColumn = postgres.StringColumn("description")
-		allColumns        = postgres.ColumnList{IDColumn, RoomNumberColumn, ClientIDColumn, StartAtColumn, EndAtColumn, DescriptionColumn}
-		mutableColumns    = postgres.ColumnList{RoomNumberColumn, ClientIDColumn, StartAtColumn, EndAtColumn, DescriptionColumn}
+		allColumns        = postgres.ColumnList{IDColumn, RoomNumberColumn, PassportColumn, StartAtColumn, EndAtColumn, DescriptionColumn}
+		mutableColumns    = postgres.ColumnList{RoomNumberColumn, PassportColumn, StartAtColumn, EndAtColumn, DescriptionColumn}
 	)
 
 	return roomOccupanciesTable{
@@ -79,7 +79,7 @@ func newRoomOccupanciesTableImpl(schemaName, tableName, alias string) roomOccupa
 		//Columns
 		ID:          IDColumn,
 		RoomNumber:  RoomNumberColumn,
-		ClientID:    ClientIDColumn,
+		Passport:    PassportColumn,
 		StartAt:     StartAtColumn,
 		EndAt:       EndAtColumn,
 		Description: DescriptionColumn,

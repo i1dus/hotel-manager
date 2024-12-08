@@ -2,10 +2,9 @@ package remove_employee_usecase
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
-	"hotel-management/internal/repository"
-	"hotel-management/internal/usecase"
+	"hotel-management/internal/domain"
+	"hotel-management/internal/domain/usecase"
 	"strings"
 )
 
@@ -17,8 +16,7 @@ type RemoveEmployeeUseCase struct {
 	employeeRepo EmployeeRepository
 }
 
-func NewRemoveEmployeeUseCase(conn *pgx.Conn) *RemoveEmployeeUseCase {
-	employeeRepo := repository.NewEmployeeRepository(conn)
+func NewRemoveEmployeeUseCase(employeeRepo EmployeeRepository) *RemoveEmployeeUseCase {
 	return &RemoveEmployeeUseCase{employeeRepo: employeeRepo}
 }
 
@@ -38,5 +36,5 @@ func (uc *RemoveEmployeeUseCase) RemoveEmployee(c tele.Context) error {
 	if err != nil {
 		return c.Send(usecase.ErrorMessage(err))
 	}
-	return c.Send("Сотрудник успешно удален!")
+	return c.Send(domain.PrefixSuccess + "Сотрудник успешно удален!")
 }

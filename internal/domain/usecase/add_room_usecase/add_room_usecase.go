@@ -2,11 +2,9 @@ package add_room_usecase
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
 	"hotel-management/internal/domain"
-	"hotel-management/internal/repository"
-	"hotel-management/internal/usecase"
+	"hotel-management/internal/domain/usecase"
 	"strconv"
 	"strings"
 )
@@ -19,8 +17,7 @@ type AddRoomUseCase struct {
 	roomRepo RoomRepository
 }
 
-func NewAddRoomUseCase(conn *pgx.Conn) *AddRoomUseCase {
-	roomRepo := repository.NewRoomRepository(conn)
+func NewAddRoomUseCase(roomRepo RoomRepository) *AddRoomUseCase {
 	return &AddRoomUseCase{roomRepo: roomRepo}
 }
 
@@ -66,5 +63,5 @@ func (uc *AddRoomUseCase) AddRoom(c tele.Context) error {
 	if err != nil {
 		return c.Send(usecase.ErrorMessage(err))
 	}
-	return c.Send("Номер успешно добавлен!")
+	return c.Send(domain.PrefixSuccess + "Номер успешно добавлен!")
 }

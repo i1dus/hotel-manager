@@ -33,7 +33,7 @@ func main() {
 	}
 
 	handlerController := handler.NewHandlerController(b, conn)
-	handlerController.RegisterHandlers(appCtx)
+	handlerController.RegisterHandlers()
 	if err != nil {
 		log.Fatal(err)
 		return

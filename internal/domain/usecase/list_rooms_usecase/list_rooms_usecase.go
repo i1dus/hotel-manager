@@ -3,11 +3,9 @@ package list_rooms_usecase
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
 	"hotel-management/internal/domain"
-	"hotel-management/internal/repository"
-	"hotel-management/internal/usecase"
+	"hotel-management/internal/domain/usecase"
 	"strings"
 )
 
@@ -19,8 +17,7 @@ type ListRoomsUseCase struct {
 	roomRepo RoomRepository
 }
 
-func NewListRoomsUseCase(conn *pgx.Conn) *ListRoomsUseCase {
-	roomRepo := repository.NewRoomRepository(conn)
+func NewListRoomsUseCase(roomRepo RoomRepository) *ListRoomsUseCase {
 	return &ListRoomsUseCase{roomRepo: roomRepo}
 }
 
@@ -32,9 +29,21 @@ func (uc *ListRoomsUseCase) ListRooms(c tele.Context) error {
 
 	message := strings.Builder{}
 	message.WriteString("Номера:")
+
+	if len(rooms) == 0 {
+		message.WriteString("\nНомера не найдены")
+		return c.Send(message.String())
+	}
+
 	for _, room := range rooms {
 		message.WriteString(fmt.Sprintf("\nНомер: '%s', Категория: '%s', Цена за сутки: %d₽",
 			room.Number, room.Type.GetRoomTypeName(), room.Price))
+
+		var needToCleanMessage = " Уборка: Нужна"
+		if room.Cleaned {
+			needToCleanMessage = " Уборка: Не нужна"
+		}
+		message.WriteString(needToCleanMessage)
 	}
 	return c.Send(message.String())
 }

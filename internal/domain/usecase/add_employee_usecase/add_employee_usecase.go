@@ -2,11 +2,9 @@ package add_employee_usecase
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
 	"hotel-management/internal/domain"
-	"hotel-management/internal/repository"
-	"hotel-management/internal/usecase"
+	"hotel-management/internal/domain/usecase"
 	"strings"
 )
 
@@ -18,8 +16,7 @@ type AddEmployeeUseCase struct {
 	employeeRepo EmployeeRepository
 }
 
-func NewAddEmployeeUseCase(conn *pgx.Conn) *AddEmployeeUseCase {
-	employeeRepo := repository.NewEmployeeRepository(conn)
+func NewAddEmployeeUseCase(employeeRepo EmployeeRepository) *AddEmployeeUseCase {
 	return &AddEmployeeUseCase{employeeRepo: employeeRepo}
 }
 
@@ -63,5 +60,5 @@ func (uc *AddEmployeeUseCase) AddEmployee(c tele.Context) error {
 	if err != nil {
 		return c.Send(usecase.ErrorMessage(err))
 	}
-	return c.Send("Сотрудник успешно добавлен!")
+	return c.Send(domain.PrefixSuccess + "Сотрудник успешно добавлен!")
 }

@@ -3,10 +3,9 @@ package change_room_price_usecase
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
-	"hotel-management/internal/repository"
-	"hotel-management/internal/usecase"
+	"hotel-management/internal/domain"
+	"hotel-management/internal/domain/usecase"
 	"strconv"
 )
 
@@ -18,8 +17,7 @@ type ChangeRoomPriceUseCase struct {
 	roomRepo RoomRepository
 }
 
-func NewChangeRoomPriceUseCase(conn *pgx.Conn) *ChangeRoomPriceUseCase {
-	roomRepo := repository.NewRoomRepository(conn)
+func NewChangeRoomPriceUseCase(roomRepo RoomRepository) *ChangeRoomPriceUseCase {
 	return &ChangeRoomPriceUseCase{roomRepo: roomRepo}
 }
 
@@ -43,5 +41,5 @@ func (uc *ChangeRoomPriceUseCase) ChangeRoomPrice(c tele.Context) error {
 	if err != nil {
 		return c.Send(usecase.ErrorMessage(err))
 	}
-	return c.Send(fmt.Sprintf("Цена за сутки номера '%s' успешно обновлена на %d₽!", number, price))
+	return c.Send(domain.PrefixSuccess + fmt.Sprintf("Цена за сутки номера '%s' успешно обновлена на %d₽!", number, price))
 }

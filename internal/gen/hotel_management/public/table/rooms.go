@@ -17,10 +17,11 @@ type roomsTable struct {
 	postgres.Table
 
 	// Columns
-	ID     postgres.ColumnInteger
-	Number postgres.ColumnString
-	Type   postgres.ColumnInteger
-	Price  postgres.ColumnInteger
+	ID      postgres.ColumnInteger
+	Number  postgres.ColumnString
+	Type    postgres.ColumnInteger
+	Price   postgres.ColumnInteger
+	Cleaned postgres.ColumnBool
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -65,18 +66,20 @@ func newRoomsTableImpl(schemaName, tableName, alias string) roomsTable {
 		NumberColumn   = postgres.StringColumn("number")
 		TypeColumn     = postgres.IntegerColumn("type")
 		PriceColumn    = postgres.IntegerColumn("price")
-		allColumns     = postgres.ColumnList{IDColumn, NumberColumn, TypeColumn, PriceColumn}
-		mutableColumns = postgres.ColumnList{NumberColumn, TypeColumn, PriceColumn}
+		CleanedColumn  = postgres.BoolColumn("cleaned")
+		allColumns     = postgres.ColumnList{IDColumn, NumberColumn, TypeColumn, PriceColumn, CleanedColumn}
+		mutableColumns = postgres.ColumnList{NumberColumn, TypeColumn, PriceColumn, CleanedColumn}
 	)
 
 	return roomsTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:     IDColumn,
-		Number: NumberColumn,
-		Type:   TypeColumn,
-		Price:  PriceColumn,
+		ID:      IDColumn,
+		Number:  NumberColumn,
+		Type:    TypeColumn,
+		Price:   PriceColumn,
+		Cleaned: CleanedColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

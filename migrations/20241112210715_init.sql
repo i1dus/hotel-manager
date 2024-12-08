@@ -2,10 +2,11 @@
 -- +goose StatementBegin
 CREATE TABLE rooms
 (
-    id     SERIAL PRIMARY KEY,
-    number TEXT    NOT NULL UNIQUE,
-    type   INTEGER NOT NULL,
-    price  INTEGER NOT NULL
+    id      SERIAL PRIMARY KEY,
+    number  TEXT    NOT NULL UNIQUE,
+    type    INTEGER NOT NULL,
+    price   INTEGER NOT NULL,
+    cleaned BOOLEAN NOT NULL DEFAULT true
 );
 
 CREATE TABLE employees
@@ -31,10 +32,10 @@ CREATE TABLE room_occupancies
 (
     id          SERIAL PRIMARY KEY,
     room_number TEXT        NOT NULL,
-    client_id   INTEGER     NOT NULL,
+    passport    TEXT        NOT NULL,
     start_at    timestamptz NOT NULL,
     end_at      timestamptz,
-    description TEXT
+    description TEXT        NOT NULL
 );
 
 -- +goose StatementEnd

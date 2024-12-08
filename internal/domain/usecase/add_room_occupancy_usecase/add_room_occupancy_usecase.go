@@ -3,19 +3,21 @@ package add_room_occupancy_usecase
 import (
 	"context"
 	"errors"
-	"fmt"
-	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
 	"hotel-management/internal/domain"
-	"hotel-management/internal/repository"
-	"hotel-management/internal/usecase"
+	"hotel-management/internal/domain/usecase"
 	"strconv"
 	"strings"
 	"time"
 )
 
+const (
+	HourEndAt = 12
+)
+
 type RoomOccupancyRepository interface {
 	AddRoomOccupancy(ctx context.Context, occupancy domain.RoomOccupancy) error
+	IsRoomOccupancyPossible(ctx context.Context, occupancy domain.RoomOccupancy) (bool, error)
 }
 
 type RoomRepository interface {
@@ -23,7 +25,7 @@ type RoomRepository interface {
 }
 
 type ClientRepository interface {
-	IsClientExist(ctx context.Context, clientID int64) (bool, error)
+	IsClientExist(ctx context.Context, passport string) (bool, error)
 }
 
 type AddRoomOccupancyUseCase struct {
@@ -32,10 +34,7 @@ type AddRoomOccupancyUseCase struct {
 	clientRepo        ClientRepository
 }
 
-func NewAddRoomOccupancyUseCase(conn *pgx.Conn) *AddRoomOccupancyUseCase {
-	roomOccupancyRepo := repository.NewRoomOccupancyRepository(conn)
-	roomRepo := repository.NewRoomRepository(conn)
-	clientRepo := repository.NewClientRepository(conn)
+func NewAddRoomOccupancyUseCase(roomOccupancyRepo RoomOccupancyRepository, roomRepo RoomRepository, clientRepo ClientRepository) *AddRoomOccupancyUseCase {
 	return &AddRoomOccupancyUseCase{roomOccupancyRepo: roomOccupancyRepo, roomRepo: roomRepo, clientRepo: clientRepo}
 }
 
@@ -43,10 +42,10 @@ func (uc *AddRoomOccupancyUseCase) AddRoomOccupancy(c tele.Context) error {
 	ctx := context.Background()
 	args := c.Args()
 	if len(args) < 3 {
-		return c.Send("Должно быть минимум 3 аргумента: Номер комнаты, ID клиента, Конец занятости (DD-MM-YYYY), опционально: описание")
+		return c.Send("Должно быть минимум 3 аргумента: Номер комнаты, Паспорт клиента, Конец занятости (DD-MM-YYYY), опционально: описание")
 	}
 
-	// ТГ-логин
+	// Номер комнаты
 	roomNumber := args[0]
 	exist, err := uc.roomRepo.IsRoomExist(ctx, roomNumber)
 	if err != nil {
@@ -57,12 +56,8 @@ func (uc *AddRoomOccupancyUseCase) AddRoomOccupancy(c tele.Context) error {
 	}
 
 	// ID-клиента
-	clientIDStr := args[1]
-	clientID, err := strconv.Atoi(clientIDStr)
-	if err != nil {
-		return c.Send(usecase.ErrorMessage(err))
-	}
-	exist, err = uc.clientRepo.IsClientExist(ctx, int64(clientID))
+	passport := args[1]
+	exist, err = uc.clientRepo.IsClientExist(ctx, passport)
 	if err != nil {
 		return c.Send(usecase.ErrorMessage(err))
 	}
@@ -83,17 +78,26 @@ func (uc *AddRoomOccupancyUseCase) AddRoomOccupancy(c tele.Context) error {
 	// Сохранение
 	occupancy := domain.RoomOccupancy{
 		RoomNumber:  roomNumber,
-		ClientID:    clientID,
+		Passport:    passport,
 		StartAt:     time.Now(),
-		EndAt:       *occupancyEndAt,
+		EndAt:       occupancyEndAt,
 		Description: description,
+	}
+
+	// Возможно ли добавить занятость (нет ли пересечения с другими занятостями)
+	ok, err := uc.roomOccupancyRepo.IsRoomOccupancyPossible(ctx, occupancy)
+	if err != nil {
+		return c.Send(usecase.ErrorMessage(err))
+	}
+	if !ok {
+		return c.Send("Занятость невозможно добавить ввиду пересечания с другой занятостью")
 	}
 
 	err = uc.roomOccupancyRepo.AddRoomOccupancy(context.Background(), occupancy)
 	if err != nil {
 		return c.Send(usecase.ErrorMessage(err))
 	}
-	return c.Send("Занятость номера успешно добавлена!")
+	return c.Send(domain.PrefixSuccess + "Занятость номера успешно добавлена!")
 }
 
 var ErrDateFormat = errors.New("неверный формат даты (должен быть: \"DD-MM-YYYY\")")
@@ -104,7 +108,7 @@ func parseDate(dateStr string) (*time.Time, error) {
 	}
 
 	dayStr, monthStr, yearStr := dateStr[:2], dateStr[3:5], dateStr[6:]
-	fmt.Println(dayStr, monthStr, yearStr)
+
 	day, err := strconv.Atoi(dayStr)
 	if err != nil {
 		return nil, err
@@ -118,6 +122,6 @@ func parseDate(dateStr string) (*time.Time, error) {
 		return nil, err
 	}
 	mskLocation, _ := time.LoadLocation("Europe/Moscow")
-	date := time.Date(year, time.Month(month), day, 12, 0, 0, 0, mskLocation)
+	date := time.Date(year, time.Month(month), day, HourEndAt, 0, 0, 0, mskLocation)
 	return &date, nil
 }

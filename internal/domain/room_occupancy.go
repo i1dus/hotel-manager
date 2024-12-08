@@ -7,8 +7,8 @@ import (
 type RoomOccupancy struct {
 	ID          int
 	RoomNumber  string
-	ClientID    int
+	Passport    string
 	StartAt     time.Time
-	EndAt       time.Time
+	EndAt       *time.Time
 	Description string
 }

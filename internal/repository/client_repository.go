@@ -38,11 +38,11 @@ func (r *ClientRepository) AddClient(ctx context.Context, client domain.Client) 
 	return err
 }
 
-func (r *ClientRepository) IsClientExist(ctx context.Context, clientID int64) (bool, error) {
+func (r *ClientRepository) IsClientExist(ctx context.Context, passport string) (bool, error) {
 	stmt, args := postgres.
 		SELECT(postgres.COUNT(postgres.STAR)).
 		FROM(table.Clients).
-		WHERE(table.Clients.ID.EQ(postgres.Int(clientID))).Sql()
+		WHERE(table.Clients.Passport.EQ(postgres.String(passport))).Sql()
 
 	var count int64
 	err := r.conn.QueryRow(ctx, stmt, args...).Scan(&count)

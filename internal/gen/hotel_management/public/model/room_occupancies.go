@@ -14,8 +14,8 @@ import (
 type RoomOccupancies struct {
 	ID          int32 `sql:"primary_key"`
 	RoomNumber  string
-	ClientID    int32
+	Passport    string
 	StartAt     time.Time
 	EndAt       *time.Time
-	Description *string
+	Description string
 }

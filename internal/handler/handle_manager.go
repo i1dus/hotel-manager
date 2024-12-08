@@ -1,17 +1,23 @@
 package handler
 
 import (
-	"context"
 	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
-	"hotel-management/internal/usecase/add_client_usecase"
-	"hotel-management/internal/usecase/add_employee_usecase"
-	"hotel-management/internal/usecase/add_room_occupancy_usecase"
-	"hotel-management/internal/usecase/add_room_usecase"
-	"hotel-management/internal/usecase/change_room_price_usecase"
-	list_employee_usecase "hotel-management/internal/usecase/list_employees_usecase"
-	"hotel-management/internal/usecase/list_rooms_usecase"
-	"hotel-management/internal/usecase/remove_employee_usecase"
+	"hotel-management/internal/domain/usecase/add_client_usecase"
+	"hotel-management/internal/domain/usecase/add_employee_usecase"
+	"hotel-management/internal/domain/usecase/add_room_occupancy_usecase"
+	"hotel-management/internal/domain/usecase/add_room_usecase"
+	"hotel-management/internal/domain/usecase/change_room_price_usecase"
+	"hotel-management/internal/domain/usecase/clean_room_usecase"
+	"hotel-management/internal/domain/usecase/end_room_occupancy_usecase"
+	"hotel-management/internal/domain/usecase/help_usecase"
+	"hotel-management/internal/domain/usecase/list_employees_usecase"
+	"hotel-management/internal/domain/usecase/list_room_occupancies_usecase"
+	"hotel-management/internal/domain/usecase/list_rooms_usecase"
+	"hotel-management/internal/domain/usecase/remove_employee_usecase"
+	"hotel-management/internal/domain/usecase/room_cleaned_usecase"
+	"hotel-management/internal/domain/usecase/statatistics_usecase"
+	"hotel-management/internal/repository"
 )
 
 type AddEmployeeUseCase interface {
@@ -46,43 +52,76 @@ type AddRoomOccupancyUseCase interface {
 	AddRoomOccupancy(c tele.Context) error
 }
 
+type ListRoomOccupancyUseCase interface {
+	ListRoomOccupancy(c tele.Context) error
+}
+
+type EndRoomOccupancyUseCase interface {
+	EndRoomOccupancy(c tele.Context) error
+}
+
+type CleanRoomUseCase interface {
+	CleanRoom(c tele.Context) error
+}
+
+type RoomCleanedUseCase interface {
+	RoomCleaned(c tele.Context) error
+}
+
+type StatisticsUseCase interface {
+	Statistics(c tele.Context) error
+}
+
+type HelpUseCase interface {
+	Help(c tele.Context) error
+}
+
 type HandlerController struct {
-	bot                     *tele.Bot
-	addEmployeeUseCase      AddEmployeeUseCase
-	removeEmployeeUseCase   RemoveEmployeeUseCase
-	listEmployeesUseCase    ListEmployeesUseCase
-	addClientUseCase        AddClientUseCase
-	addRoomUseCase          AddRoomUseCase
-	listRoomsUseCase        ListRoomsUseCase
-	changeRoomPriceUseCase  ChangeRoomPriceUseCase
-	addRoomOccupancyUseCase AddRoomOccupancyUseCase
+	bot                      *tele.Bot
+	addEmployeeUseCase       AddEmployeeUseCase
+	removeEmployeeUseCase    RemoveEmployeeUseCase
+	listEmployeesUseCase     ListEmployeesUseCase
+	addClientUseCase         AddClientUseCase
+	addRoomUseCase           AddRoomUseCase
+	listRoomsUseCase         ListRoomsUseCase
+	changeRoomPriceUseCase   ChangeRoomPriceUseCase
+	addRoomOccupancyUseCase  AddRoomOccupancyUseCase
+	listRoomOccupancyUseCase ListRoomOccupancyUseCase
+	endRoomOccupancyUseCase  EndRoomOccupancyUseCase
+	cleanRoomUseCase         CleanRoomUseCase
+	roomCleanedUseCase       RoomCleanedUseCase
+	statisticsUseCase        StatisticsUseCase
+	helpUseCase              HelpUseCase
 }
 
 func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
-	addEmployeeUseCase := add_employee_usecase.NewAddEmployeeUseCase(conn)
-	removeEmployeeUseCase := remove_employee_usecase.NewRemoveEmployeeUseCase(conn)
-	listEmployeesUseCase := list_employee_usecase.NewListEmployeesUseCase(conn)
-	addClientUseCase := add_client_usecase.NewAddClientUseCase(conn)
-	addRoomUseCase := add_room_usecase.NewAddRoomUseCase(conn)
-	listRoomsUseCase := list_rooms_usecase.NewListRoomsUseCase(conn)
-	changeRoomPriceUseCase := change_room_price_usecase.NewChangeRoomPriceUseCase(conn)
-	addRoomOccupancyUseCase := add_room_occupancy_usecase.NewAddRoomOccupancyUseCase(conn)
+	clientRepository := repository.NewClientRepository(conn)
+	employeeRepository := repository.NewEmployeeRepository(conn)
+	roomRepository := repository.NewRoomRepository(conn)
+	roomOccupancyRepository := repository.NewRoomOccupancyRepository(conn)
+
 	return &HandlerController{
-		bot:                     bot,
-		addEmployeeUseCase:      addEmployeeUseCase,
-		removeEmployeeUseCase:   removeEmployeeUseCase,
-		listEmployeesUseCase:    listEmployeesUseCase,
-		addClientUseCase:        addClientUseCase,
-		addRoomUseCase:          addRoomUseCase,
-		listRoomsUseCase:        listRoomsUseCase,
-		changeRoomPriceUseCase:  changeRoomPriceUseCase,
-		addRoomOccupancyUseCase: addRoomOccupancyUseCase,
+		bot:                      bot,
+		helpUseCase:              help_usecase.NewHelpUseCase(),
+		addEmployeeUseCase:       add_employee_usecase.NewAddEmployeeUseCase(employeeRepository),
+		removeEmployeeUseCase:    remove_employee_usecase.NewRemoveEmployeeUseCase(employeeRepository),
+		listEmployeesUseCase:     list_employee_usecase.NewListEmployeesUseCase(employeeRepository),
+		addClientUseCase:         add_client_usecase.NewAddClientUseCase(clientRepository),
+		addRoomUseCase:           add_room_usecase.NewAddRoomUseCase(roomRepository),
+		listRoomsUseCase:         list_rooms_usecase.NewListRoomsUseCase(roomRepository),
+		changeRoomPriceUseCase:   change_room_price_usecase.NewChangeRoomPriceUseCase(roomRepository),
+		addRoomOccupancyUseCase:  add_room_occupancy_usecase.NewAddRoomOccupancyUseCase(roomOccupancyRepository, roomRepository, clientRepository),
+		listRoomOccupancyUseCase: list_room_occupancies_usecase.NewListRoomOccupancyUseCase(roomOccupancyRepository),
+		endRoomOccupancyUseCase:  end_room_occupancy_usecase.NewEndRoomOccupancyUseCase(roomOccupancyRepository),
+		cleanRoomUseCase:         clean_room_usecase.NewCleanRoomUseCase(roomRepository),
+		roomCleanedUseCase:       room_cleaned_usecase.NewRoomCleanedUseCase(roomRepository),
+		statisticsUseCase:        statatistics_usecase.NewStatisticsUseCase(roomOccupancyRepository),
 	}
 }
 
-func (ctrl *HandlerController) RegisterHandlers(ctx context.Context) {
+func (ctrl *HandlerController) RegisterHandlers() {
 	ctrl.bot.Handle(tele.OnText, func(c tele.Context) error {
-		return c.Send("я работаю!")
+		return c.Send("🚀 Я работаю!")
 	})
 
 	// employees managing commands
@@ -95,10 +134,17 @@ func (ctrl *HandlerController) RegisterHandlers(ctx context.Context) {
 
 	// rooms managing commands
 	ctrl.bot.Handle("/add_room", ctrl.addRoomUseCase.AddRoom)
-	ctrl.bot.Handle("/list_rooms", ctrl.listRoomsUseCase.ListRooms)
+	ctrl.bot.Handle("/rooms", ctrl.listRoomsUseCase.ListRooms)
 	ctrl.bot.Handle("/change_room_price", ctrl.changeRoomPriceUseCase.ChangeRoomPrice)
+	ctrl.bot.Handle("/clean_room", ctrl.cleanRoomUseCase.CleanRoom)
+	ctrl.bot.Handle("/room_cleaned", ctrl.roomCleanedUseCase.RoomCleaned)
 
 	// room occupancy managing commands
 	ctrl.bot.Handle("/add_occupancy", ctrl.addRoomOccupancyUseCase.AddRoomOccupancy)
+	ctrl.bot.Handle("/occupancies", ctrl.listRoomOccupancyUseCase.ListRoomOccupancy)
+	ctrl.bot.Handle("/end_occupancy", ctrl.endRoomOccupancyUseCase.EndRoomOccupancy)
 
+	// other commands
+	ctrl.bot.Handle("/help", ctrl.helpUseCase.Help)
+	ctrl.bot.Handle("/stats", ctrl.statisticsUseCase.Statistics)
 }

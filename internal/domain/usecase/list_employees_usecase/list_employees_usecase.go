@@ -3,11 +3,9 @@ package list_employee_usecase
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
 	"hotel-management/internal/domain"
-	"hotel-management/internal/repository"
-	"hotel-management/internal/usecase"
+	"hotel-management/internal/domain/usecase"
 	"strings"
 )
 
@@ -19,8 +17,7 @@ type ListEmployeesUseCase struct {
 	employeeRepo EmployeeRepository
 }
 
-func NewListEmployeesUseCase(conn *pgx.Conn) *ListEmployeesUseCase {
-	employeeRepo := repository.NewEmployeeRepository(conn)
+func NewListEmployeesUseCase(employeeRepo EmployeeRepository) *ListEmployeesUseCase {
 	return &ListEmployeesUseCase{employeeRepo: employeeRepo}
 }
 
@@ -32,6 +29,12 @@ func (uc *ListEmployeesUseCase) ListEmployees(c tele.Context) error {
 
 	message := strings.Builder{}
 	message.WriteString("Сотрудники:")
+
+	if len(employees) == 0 {
+		message.WriteString("\nСотрудники не найдены")
+		return c.Send(message.String())
+	}
+
 	for _, employee := range employees {
 		message.WriteString(fmt.Sprintf("\nUsername: @%s, Должность: '%s', Имя: '%s'",
 			employee.Username, employee.Position.GetPositionName(), employee.Name))

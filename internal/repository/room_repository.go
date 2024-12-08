@@ -57,7 +57,7 @@ func (r *RoomRepository) ListRooms(ctx context.Context) ([]domain.Room, error) {
 
 	for rows.Next() {
 		var room model.Rooms
-		if err := rows.Scan(&room.ID, &room.Number, &room.Type, &room.Price); err != nil {
+		if err := rows.Scan(&room.ID, &room.Number, &room.Type, &room.Price, &room.Cleaned); err != nil {
 			return nil, err
 		}
 		modelRooms = append(modelRooms, room)
@@ -65,9 +65,10 @@ func (r *RoomRepository) ListRooms(ctx context.Context) ([]domain.Room, error) {
 
 	rooms := lo.Map(modelRooms, func(modelRoom model.Rooms, index int) domain.Room {
 		return domain.Room{
-			Number: modelRoom.Number,
-			Type:   domain.RoomCategory(modelRoom.Type),
-			Price:  int(modelRoom.Price),
+			Number:  modelRoom.Number,
+			Type:    domain.RoomCategory(modelRoom.Type),
+			Price:   int(modelRoom.Price),
+			Cleaned: modelRoom.Cleaned,
 		}
 	})
 
@@ -105,4 +106,20 @@ func (r *RoomRepository) IsRoomExist(ctx context.Context, number string) (bool, 
 		return false, nil
 	}
 	return true, nil
+}
+
+func (r *RoomRepository) ChangeRoomCleaned(ctx context.Context, number string, cleaned bool) error {
+	stmt, args := table.Rooms.
+		UPDATE(table.Rooms.Cleaned).
+		SET(postgres.Bool(cleaned)).
+		WHERE(table.Rooms.Number.EQ(postgres.String(number))).Sql()
+
+	res, err := r.conn.Exec(ctx, stmt, args...)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return ErrRoomNotFound
+	}
+	return nil
 }
