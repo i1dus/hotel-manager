@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
+	"hotel-management/internal/domain"
 	"hotel-management/internal/domain/usecase/add_client_usecase"
 	"hotel-management/internal/domain/usecase/add_employee_usecase"
 	"hotel-management/internal/domain/usecase/add_room_occupancy_usecase"
@@ -85,16 +86,33 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 }
 
 func (ctrl *HandlerController) RegisterHandlers() {
+	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
+	btnHelp := menu.Text("ℹ Помощь по командам")
+	menu.Reply(
+		menu.Row(btnHelp),
+	)
+
+	ctrl.bot.Handle("/start", func(c tele.Context) error {
+		return c.Send(domain.WelcomeMsg, menu)
+	})
+
 	ctrl.bot.Handle(tele.OnText, func(c tele.Context) error {
 		return c.Send("🚀 Я работаю!")
 	})
 
-	// Register all handlers
+	ctrl.bot.Handle(&btnHelp, ctrl.helpUseCase.Help)
+
+	// Зарегистрировать все хэндлеры
 	for _, handler := range ctrl.handlers {
 		handler.RegisterHandlers()
 	}
 
-	// other commands
+	// Остальные команды
 	ctrl.bot.Handle("/help", ctrl.helpUseCase.Help)
 	ctrl.bot.Handle("/stats", ctrl.statisticsUseCase.Statistics)
 }
+
+//Отправить конкретному юзеру
+//ctrl.bot.Send(&tele.User{
+//	ID: 123,
+//}, "Hi")

@@ -34,10 +34,5 @@ func main() {
 
 	handlerController := handler.NewHandlerController(b, conn)
 	handlerController.RegisterHandlers()
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
 	b.Start()
 }
