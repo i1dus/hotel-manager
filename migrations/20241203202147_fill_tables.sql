@@ -10,5 +10,5 @@ VALUES ('101', 1, 5000),
 
 -- +goose Down
 -- +goose StatementBegin
-TRUNCATE TABLE rooms;
+DELETE FROM rooms WHERE number in ('101', '102', '201', '202', '301');
 -- +goose StatementEnd
