@@ -5,6 +5,7 @@ type Employee struct {
 	Username string
 	Name     string
 	Position Position
+	UserID   int
 }
 
 // Position - должность (позиция) работника.
@@ -17,6 +18,15 @@ const (
 	PositionReceptionist Position = 3
 	PositionMaid         Position = 4
 )
+
+func GetAllPositions() []Position {
+	return []Position{
+		PositionOwner,
+		PositionManager,
+		PositionReceptionist,
+		PositionMaid,
+	}
+}
 
 func (p Position) GetPositionName() PositionName {
 	switch p {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5"
 	"hotel-management/internal/handler"
+	"hotel-management/internal/middleware"
 	"log"
 	"os"
 	"time"
@@ -32,7 +33,12 @@ func main() {
 		return
 	}
 
+	middleware := middleware.NewMiddleware(conn)
+	b.Use(middleware.Logger())
+	b.Use(middleware.PermissionCheck(appCtx))
+
 	handlerController := handler.NewHandlerController(b, conn)
 	handlerController.RegisterHandlers()
+
 	b.Start()
 }

@@ -12,4 +12,5 @@ type Employees struct {
 	Username string
 	Name     *string
 	Position int32
+	UserID   *int32
 }

@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
-	"hotel-management/internal/domain"
 	"hotel-management/internal/domain/usecase/add_client_usecase"
 	"hotel-management/internal/domain/usecase/add_employee_usecase"
 	"hotel-management/internal/domain/usecase/add_room_occupancy_usecase"
@@ -17,11 +16,13 @@ import (
 	"hotel-management/internal/domain/usecase/list_rooms_usecase"
 	"hotel-management/internal/domain/usecase/remove_employee_usecase"
 	"hotel-management/internal/domain/usecase/room_cleaned_usecase"
+	"hotel-management/internal/domain/usecase/start_usecase"
 	"hotel-management/internal/domain/usecase/statatistics_usecase"
 	"hotel-management/internal/handler/client_handler"
 	"hotel-management/internal/handler/employee_handler"
 	"hotel-management/internal/handler/room_handler"
 	"hotel-management/internal/handler/room_occupancy_handler"
+	"hotel-management/internal/handler/start_handler"
 	"hotel-management/internal/repository"
 )
 
@@ -50,6 +51,7 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 	employeeRepository := repository.NewEmployeeRepository(conn)
 	roomRepository := repository.NewRoomRepository(conn)
 	roomOccupancyRepository := repository.NewRoomOccupancyRepository(conn)
+	menu := start_handler.NewMenuWrapper()
 
 	employeeHandler := employee_handler.NewEmployeeHandler(bot,
 		add_employee_usecase.NewAddEmployeeUseCase(employeeRepository),
@@ -69,8 +71,12 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 	roomOccupancyHandler := room_occupancy_handler.NewRoomOccupancyHandler(bot,
 		add_room_occupancy_usecase.NewAddRoomOccupancyUseCase(roomOccupancyRepository, roomRepository, clientRepository),
 		list_room_occupancies_usecase.NewListRoomOccupancyUseCase(roomOccupancyRepository),
-		end_room_occupancy_usecase.NewEndRoomOccupancyUseCase(roomOccupancyRepository),
-	)
+		end_room_occupancy_usecase.NewEndRoomOccupancyUseCase(roomOccupancyRepository))
+
+	startHandler := start_handler.NewStartHandler(bot,
+		menu,
+		help_usecase.NewHelpUseCase(),
+		start_usecase.NewStartUseCase(employeeRepository, menu.Menu))
 
 	return &HandlerController{
 		bot: bot,
@@ -79,6 +85,7 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 			clientHandler,
 			roomHandler,
 			roomOccupancyHandler,
+			startHandler,
 		},
 		helpUseCase:       help_usecase.NewHelpUseCase(),
 		statisticsUseCase: statatistics_usecase.NewStatisticsUseCase(roomOccupancyRepository),
@@ -86,33 +93,15 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 }
 
 func (ctrl *HandlerController) RegisterHandlers() {
-	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
-	btnHelp := menu.Text("ℹ Помощь по командам")
-	menu.Reply(
-		menu.Row(btnHelp),
-	)
-
-	ctrl.bot.Handle("/start", func(c tele.Context) error {
-		return c.Send(domain.WelcomeMsg, menu)
-	})
-
-	ctrl.bot.Handle(tele.OnText, func(c tele.Context) error {
-		return c.Send("🚀 Я работаю!")
-	})
-
-	ctrl.bot.Handle(&btnHelp, ctrl.helpUseCase.Help)
-
 	// Зарегистрировать все хэндлеры
 	for _, handler := range ctrl.handlers {
 		handler.RegisterHandlers()
 	}
 
-	// Остальные команды
+	// Остальные команды todo: разобрать
+	ctrl.bot.Handle(tele.OnText, func(c tele.Context) error {
+		return c.Send("🚀 Я работаю!")
+	})
 	ctrl.bot.Handle("/help", ctrl.helpUseCase.Help)
 	ctrl.bot.Handle("/stats", ctrl.statisticsUseCase.Statistics)
 }
-
-//Отправить конкретному юзеру
-//ctrl.bot.Send(&tele.User{
-//	ID: 123,
-//}, "Hi")
