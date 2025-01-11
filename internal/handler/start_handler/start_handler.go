@@ -2,6 +2,7 @@ package start_handler
 
 import (
 	tele "gopkg.in/telebot.v4"
+	"hotel-management/internal/domain"
 )
 
 type HelpUseCase interface {
@@ -25,6 +26,6 @@ func NewStartHandler(bot *tele.Bot, menuWrapper *MenuWrapper, helpUseCase HelpUs
 }
 
 func (h *StartHandler) RegisterHandlers() {
-	h.bot.Handle("/start", h.startUseCase.Start)
+	h.bot.Handle(domain.CommandStart, h.startUseCase.Start)
 	h.bot.Handle(h.menuWrapper.BtnHelp, h.helpUseCase.Help)
 }
