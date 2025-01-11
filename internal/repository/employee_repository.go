@@ -72,7 +72,7 @@ func (r *EmployeeRepository) ListEmployees(ctx context.Context) ([]domain.Employ
 
 	for rows.Next() {
 		var employee model.Employees
-		if err := rows.Scan(&employee.ID, &employee.Username, &employee.Name, &employee.Position); err != nil {
+		if err := rows.Scan(&employee.ID, &employee.Username, &employee.Name, &employee.Position, &employee.UserID); err != nil {
 			return nil, err
 		}
 		modelEmployees = append(modelEmployees, employee)
@@ -87,4 +87,40 @@ func (r *EmployeeRepository) ListEmployees(ctx context.Context) ([]domain.Employ
 	})
 
 	return employees, nil
+}
+
+func (r *EmployeeRepository) IsEmployeeWithPositions(ctx context.Context, username string, positions []domain.Position) (bool, error) {
+	positionIDs := lo.Map(positions, func(item domain.Position, index int) postgres.Expression {
+		return postgres.Int(int64(item))
+	})
+
+	stmt, args := postgres.SELECT(
+		postgres.COUNT(postgres.STAR)).
+		FROM(table.Employees).
+		WHERE(table.Employees.Username.EQ(postgres.String(username)).
+			AND(table.Employees.Position.IN(positionIDs...))).
+		Sql()
+
+	var count int64
+	err := r.conn.QueryRow(ctx, stmt, args...).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count != 0, nil
+}
+
+func (r *EmployeeRepository) UpsertEmployeeUserID(ctx context.Context, username string, userID int) error {
+	stmt, args := table.Employees.
+		UPDATE(table.Employees.UserID).
+		SET(postgres.Int(int64(userID))).
+		WHERE(table.Employees.Username.EQ(postgres.String(username))).Sql()
+
+	res, err := r.conn.Exec(ctx, stmt, args...)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return ErrEmployeeNotFound
+	}
+	return nil
 }

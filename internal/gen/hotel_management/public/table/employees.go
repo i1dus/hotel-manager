@@ -21,6 +21,7 @@ type employeesTable struct {
 	Username postgres.ColumnString
 	Name     postgres.ColumnString
 	Position postgres.ColumnInteger
+	UserID   postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -65,8 +66,9 @@ func newEmployeesTableImpl(schemaName, tableName, alias string) employeesTable {
 		UsernameColumn = postgres.StringColumn("username")
 		NameColumn     = postgres.StringColumn("name")
 		PositionColumn = postgres.IntegerColumn("position")
-		allColumns     = postgres.ColumnList{IDColumn, UsernameColumn, NameColumn, PositionColumn}
-		mutableColumns = postgres.ColumnList{UsernameColumn, NameColumn, PositionColumn}
+		UserIDColumn   = postgres.IntegerColumn("user_id")
+		allColumns     = postgres.ColumnList{IDColumn, UsernameColumn, NameColumn, PositionColumn, UserIDColumn}
+		mutableColumns = postgres.ColumnList{UsernameColumn, NameColumn, PositionColumn, UserIDColumn}
 	)
 
 	return employeesTable{
@@ -77,6 +79,7 @@ func newEmployeesTableImpl(schemaName, tableName, alias string) employeesTable {
 		Username: UsernameColumn,
 		Name:     NameColumn,
 		Position: PositionColumn,
+		UserID:   UserIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

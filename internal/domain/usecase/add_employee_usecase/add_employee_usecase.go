@@ -28,6 +28,7 @@ func (uc *AddEmployeeUseCase) AddEmployee(c tele.Context) error {
 
 	// ТГ-логин
 	username := args[0]
+
 	if len(username) > 1 && !strings.HasPrefix(username, "@") {
 		return c.Send("Логин должен начинаться с '@'")
 	}
