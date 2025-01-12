@@ -20,6 +20,7 @@ const (
 	CommandChangeRoomPrice = "/change_room_price"
 	CommandCleanRoom       = "/clean_room"
 	CommandRoomCleaned     = "/room_cleaned"
+	CommandCommentRoom     = "/comment_room"
 )
 
 // Room occupancy managing commands

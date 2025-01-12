@@ -10,6 +10,7 @@ import (
 	"hotel-management/internal/domain/usecase/add_room_usecase"
 	"hotel-management/internal/domain/usecase/change_room_price_usecase"
 	"hotel-management/internal/domain/usecase/clean_room_usecase"
+	"hotel-management/internal/domain/usecase/comment_room_usecase"
 	"hotel-management/internal/domain/usecase/end_room_occupancy_usecase"
 	"hotel-management/internal/domain/usecase/help_usecase"
 	"hotel-management/internal/domain/usecase/list_employees_usecase"
@@ -69,7 +70,9 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 		list_rooms_usecase.NewListRoomsUseCase(roomRepository),
 		change_room_price_usecase.NewChangeRoomPriceUseCase(roomRepository),
 		clean_room_usecase.NewCleanRoomUseCase(roomRepository),
-		room_cleaned_usecase.NewRoomCleanedUseCase(roomRepository))
+		room_cleaned_usecase.NewRoomCleanedUseCase(roomRepository),
+		comment_room_usecase.NewCommentRoomUseCase(roomRepository),
+	)
 
 	roomOccupancyHandler := room_occupancy_handler.NewRoomOccupancyHandler(bot,
 		add_room_occupancy_usecase.NewAddRoomOccupancyUseCase(roomOccupancyRepository, roomRepository, clientRepository),
@@ -95,15 +98,14 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 }
 
 func (ctrl *HandlerController) RegisterHandlers() {
+	ctrl.bot.Handle(tele.OnText, func(c tele.Context) error {
+		return c.Send(domain.UnknownMessage)
+	})
+	ctrl.bot.Handle(domain.CommandHelp, ctrl.helpUseCase.Help)
+	ctrl.bot.Handle(domain.CommandStatistics, ctrl.statisticsUseCase.Statistics)
+
 	// Зарегистрировать все хэндлеры
 	for _, handler := range ctrl.handlers {
 		handler.RegisterHandlers()
 	}
-
-	// Остальные команды todo: разобрать
-	ctrl.bot.Handle(tele.OnText, func(c tele.Context) error {
-		return c.Send("🚀 Я работаю!")
-	})
-	ctrl.bot.Handle(domain.CommandHelp, ctrl.helpUseCase.Help)
-	ctrl.bot.Handle(domain.CommandStatistics, ctrl.statisticsUseCase.Statistics)
 }
