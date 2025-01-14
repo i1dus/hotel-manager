@@ -3,7 +3,7 @@ package domain
 // Employee managing commands
 const (
 	CommandAddEmployee    = "/add_employee"
-	CommandRemoveEmployee = "/add_employee"
+	CommandRemoveEmployee = "/remove_employee"
 	CommandListEmployees  = "/employees"
 	CommandSendAllMessage = "/send_all_message"
 )

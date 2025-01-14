@@ -4,6 +4,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	tele "gopkg.in/telebot.v4"
 	"hotel-management/internal/domain"
+	"hotel-management/internal/domain/usecase/about_usecase"
 	"hotel-management/internal/domain/usecase/add_client_usecase"
 	"hotel-management/internal/domain/usecase/add_employee_usecase"
 	"hotel-management/internal/domain/usecase/add_room_occupancy_usecase"
@@ -81,6 +82,7 @@ func NewHandlerController(bot *tele.Bot, conn *pgx.Conn) *HandlerController {
 
 	startHandler := start_handler.NewStartHandler(bot, menu,
 		help_usecase.NewHelpUseCase(),
+		about_usecase.NewAboutUseCase(),
 		start_usecase.NewStartUseCase(employeeRepository, menu.Menu))
 
 	return &HandlerController{
