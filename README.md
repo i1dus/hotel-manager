@@ -1,73 +1,66 @@
 # Hotel Manager
 
-1. [Описание](#описание)
-2. [Сценарии использования](#сценарии-использования)
-3. [Итерации разработки](#итерации-разработки)
+1. [Description](#description)
+2. [Use Cases](#use-cases)
+3. [Development Iterations](#development-iterations)
 
 ---
 
-## Описание
+## Description
 
-Сервис управления и контроля отеля.
+A hotel management and control service.
 
-Написан на языке Golang с использованием Telegram API. В качестве базы данных используется PostgreSQL.
+Written in Golang using the Telegram API. PostgreSQL is used as the database.
 
 ---
 
-## Сценарии использования
+## Use Cases
 
-Сервис имеет ролевую модель, в качестве акторов будут выступать:
+The service has a role-based model. The following actors are involved:
 
-1. **Владелец**. Владелец является главным администратором системы и имеет полный доступ к управлению всеми аспектами
-   работы отеля.
+1. **Owner**. The owner is the main administrator of the system and has full access to managing all aspects of the hotel’s operations.
 
-- Получает отчетную информацию об отеле.
-- Управляет кадрами, что включает:
-  добавление/удаление сотрудников (менеджеров, ресепшионистов, горничных),
-  назначение менеджеров, ответственных за разные аспекты работы отеля.
-- Может управлять политикой цен на номера и другие услуги отеля.
+   - Receives reporting information about the hotel.
+   - Manages staff, which includes:
+     adding/removing employees (managers, receptionists, housekeepers),
+     assigning managers responsible for different aspects of hotel operations.
+   - Can manage pricing policies for rooms and other hotel services.
 
-2. **Менеджер-администратор**. Менеджер-администратор занимается непосредственным управлением и координацией работы
-   отеля на ежедневной основе.
+2. **Manager-Administrator**. The manager-administrator handles the day-to-day management and coordination of the hotel’s operations.
 
-- Контролирует бронирование номеров и следит за своевременным заселением и выселением гостей.
-- Поддерживает контакт с владельцем и предоставляет ему необходимую отчетную информацию.
-- Обрабатывает жалобы и пожелания клиентов, решает возникающие вопросы.
-- Контролирует состояние помещений отеля, инициирует ремонтные работы при необходимости.
-- Может добавлять и изменять информацию о доступности номеров и услуг в системе.
+   - Controls room reservations and monitors timely check-ins and check-outs.
+   - Maintains contact with the owner and provides necessary reporting information.
+   - Processes customer complaints and requests, resolving issues as they arise.
+   - Monitors the condition of hotel premises and initiates repairs when necessary.
+   - Can add and modify information about room and service availability in the system.
 
-3. **Ресепшионист**. Ресепшионист взаимодействует с гостями отеля напрямую и является их основным контактным лицом.
+3. **Receptionist**. The receptionist interacts directly with hotel guests and serves as their primary point of contact.
 
-- Оформляет регистрацию гостей при заселении и выселении.
-- Ведет учет бронирований, проверяет наличие свободных номеров.
-- Обрабатывает запросы и пожелания гостей во время их пребывания в отеле (дополнительные услуги, информация и т.д.).
-- Передает менеджеру-администратору информацию о любых проблемах или нарушениях, связанных с гостями.
+   - Handles guest registration during check-in and check-out.
+   - Keeps records of bookings and checks the availability of free rooms.
+   - Processes guest requests and wishes during their stay (additional services, information, etc.).
+   - Reports any issues or violations related to guests to the manager-administrator.
 
-4. **Горничная**. Горничная отвечает за чистоту и порядок в номерах и общих зонах отеля.
+4. **Housekeeper**. The housekeeper is responsible for cleanliness and order in guest rooms and common areas.
 
-- Проводит ежедневную уборку номеров в соответствии с графиком.
-- Информирует ресепшиониста или менеджера-администратора о любых неисправностях или повреждениях в номерах.
-- Поддерживает чистоту в общественных зонах отеля (холлы, коридоры и т.д.).
-- Сообщает о завершении уборки номеров через систему.
+   - Performs daily room cleaning according to the schedule.
+   - Informs the receptionist or manager-administrator about any malfunctions or damage in rooms.
+   - Maintains cleanliness in the hotel’s public areas (lobbies, corridors, etc.).
+   - Reports completion of room cleaning through the system.
 
---- 
+---
 
-## Итерации разработки
+## Development Iterations
 
-### Итерация 1. Базовая функциональность и стабильность.
+### Iteration 1. Basic functionality and stability.
 
-В ходе первой итерации был заложен фундамент проекта и добавлена базовая
-функциональность в виде 12 команд, отвечающие за номера, клиентов,
-работников и занятость номеров.
+In the first iteration, the project foundation was laid and basic functionality was added in the form of 12 commands covering rooms, clients, employees, and room occupancy.
 
-### Итерация 2. Расширение функциональности.
+### Iteration 2. Functionality expansion.
 
-Во второй итерации была реализована ролевая модель, выполненная с
-использованием middleware. Со стороны front-end части (Telegram’а) были
-добавлены более удобные кнопки для взаимодействия с системой. Также
-была выполнена реструктуризация пакетов и проведен рефакторинг кода.
+In the second iteration, a role-based model was implemented using middleware. On the front-end side (Telegram), more convenient buttons were added for interacting with the system. Package restructuring and code refactoring were also performed.
 
-### Итерация 3. Полное завершение функционала и выход в мир.
+### Iteration 3. Full feature completion and public release.
 
-Было завершено внедрение всех функций и улучшение удобства использования системы (UI/UX).
-Улучшение поведения системы, исправление текстов, а также проведен рефакторинг кода и его дополнение.
+All features were finalized and the system’s usability (UI/UX) was improved. System behavior was enhanced, texts were corrected, and additional refactoring and code improvements were carried out.
+
