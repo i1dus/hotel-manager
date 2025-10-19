@@ -1,5 +1,9 @@
 # Hotel Manager
 
+*[Read this in Russian / Читать на русском →](./README_ru.md)*
+
+---
+
 1. [Description](#description)
 2. [Use Cases](#use-cases)
 3. [Development Iterations](#development-iterations)
